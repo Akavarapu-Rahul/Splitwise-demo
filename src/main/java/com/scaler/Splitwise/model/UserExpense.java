@@ -17,3 +17,15 @@ public class UserExpense extends BaseModel{
     @Enumerated(EnumType.STRING)
     private UserExpenseType userExpenseType;
 }
+/*
+        Expense
+            A = 100 -> UserExpense
+            B = 100
+
+
+            UserExpense : User -> M:1
+
+            User        UserExpense
+              1             M
+             1              1
+ */

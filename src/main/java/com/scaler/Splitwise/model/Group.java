@@ -1,12 +1,12 @@
 package com.scaler.Splitwise.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Currency;
 import java.util.List;
 
 @Getter
@@ -18,6 +18,7 @@ public class Group extends BaseModel{
     private double totalAmountSpent;
     private Currency defaultCurrency;
     @OneToMany
+    @JoinColumn(name="splitwise_goud_id")
     private List<Expense>expenses;
     @ManyToMany
     private List<User> users;

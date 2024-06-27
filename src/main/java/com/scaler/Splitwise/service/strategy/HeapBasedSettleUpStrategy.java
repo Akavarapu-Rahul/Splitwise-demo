@@ -19,7 +19,7 @@ public class HeapBasedSettleUpStrategy implements SettleUpStrategy{
             for (UserExpense userExpense: expense.getUserExpenses()){
                 User user=userExpense.getUser();
                 double currentOutStandingAmount=outStandingAmountMap.getOrDefault(user,0.00);
-                outStandingAmountMap.put(user,getUpdatedOutStandingAmount(currentOutStandingAmount));
+                outStandingAmountMap.put(user,getUpdatedOutStandingAmount(currentOutStandingAmount,userExpense));
             }
         }
 
@@ -40,12 +40,33 @@ public class HeapBasedSettleUpStrategy implements SettleUpStrategy{
             } else if (entry.getValue()>0) {
                 maxHeap.add(entry);
             } else {
-                System.out.println(entry.getKey().getName()+ "'s is alrady settled up");
+                System.out.println(entry.getKey().getName()+ "'s is already settled up");
             }
         }
 
         //calculate the transactions until the heaps before empty
+        while(!minHeap.isEmpty()){
+            //removing out min from minHeap, and max from maxHeap
+            Map.Entry<User,Double> maxHastoPay=minHeap.poll();
+            Map.Entry<User,Double> maxWillGetPaid=maxHeap.poll();
+            TransactionDTO transactionDTO=new TransactionDTO(
+                    maxHastoPay.getKey().getName(),
+                    maxWillGetPaid.getKey().getName(),
+                    Math.min(Math.abs(maxHastoPay.getValue()), maxWillGetPaid.getValue())
+            );
 
+            transactions.add(transactionDTO);
+            double newBalance=maxHastoPay.getValue()+maxWillGetPaid.getValue(); //-ve + +ve difference
+            if(newBalance ==0){ //means both are equal and settled the balances
+                System.out.println("Settled for : "+maxHastoPay.getKey().getName()+", and "+maxWillGetPaid.getKey().getName());
+            } else if (newBalance<0) { //means person who had to pay was greater in value, so goes back to min heap with new updated balance
+                maxHastoPay.setValue(newBalance);
+            } else if (newBalance>0) { //means person who will get paid was greater in value, so goes back to max heap with new updated balance
+                maxWillGetPaid.setValue(newBalance);
+                maxHeap.add(maxWillGetPaid);
+            }
+        }
+        return transactions;
     }
 
     private double getUpdatedOutStandingAmount(double currentOutStandingAmount,UserExpense userExpense){
